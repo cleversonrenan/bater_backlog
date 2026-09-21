@@ -69,7 +69,7 @@
 
   <header>
     <h1>Instalar Testador de Alarmes no Portal</h1>
-    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.4</span></p>
+    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.5</span></p>
   </header>
 
   <div class="card">
@@ -77,7 +77,7 @@
     <ol>
       <li><b>Arraste o botão azul abaixo</b> para a barra de favoritos do seu navegador (Ctrl+Shift+B para mostrar a barra).</li>
       <li>Abra o portal <code>tim-access-portal-prd.133e5xtaze4h...</code> e <b>clique no favorito</b> que acabou de criar.</li>
-      <li>Um painel "Testador de Alarmes" aparece no canto do portal. Cole a lista de END_ID e clique em <b>Iniciar</b>.</li>
+      <li>Um painel "Testador de Alarmes" aparece no canto do portal. Importe a planilha e clique em <b>Testar planilha</b>, ou cole END_ID e clique em <b>Iniciar</b>.</li>
     </ol>
 
     <div class="bookmark-slot">
@@ -98,9 +98,11 @@
       <li><b>Aguarda a resposta real</b> (a que contém "ALARMES NETCOOL PARA O END_ID ...") e ignora as mensagens de aguardo ("Vou verificar...") e de feedback.</li>
       <li>Só então classifica a linha como <span style="color:var(--red);font-weight:700;">ALARME</span> ou <span style="color:var(--green);font-weight:700;">NORMAL</span> na tabela.</li>
       <li>Exporta a planilha <code>.xlsx</code> com uma aba para Todos, Com Alarme, Normalizados e Pendentes.</li>
+      <li>Na planilha importada, tenta <code>END_ID alarme</code>, depois <code>NE ID alarme</code> e, se necessário, <code>TSK validar</code>. Após a resposta da TSK, seleciona <b>Sim</b> para registrar no ticket.</li>
     </ol>
   </div>
 
+<footer aria-label="Informações do desenvolvedor" style="margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center"><div>Desenvolvedor: <strong style="font-weight:600">Cleverson Renan</strong></div><div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px"><a href="mailto:cleversonrenan@gmail.com" style="color:inherit;text-decoration:none">cleversonrenan@gmail.com</a><a href="https://wa.me/5521983600686" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp: (21) 98360-0686" style="display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style="flex-shrink:0"><path d="M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z"/></svg>(21) 98360-0686</a></div></footer>
 </div>
 
 <script type="text/plain" id="appCode">
@@ -141,6 +143,8 @@
     var rows = loadSession();
     var running = false;
     var stopRequested = false;
+    var clickedTicketButtons = new WeakSet();
+    var clickedSegmentButtons = new WeakSet();
 
     function loadKeywords() {
       try { var raw = localStorage.getItem(LS_KEYWORDS); if (raw) return JSON.parse(raw); } catch (e) {}
@@ -293,6 +297,140 @@
       });
     }
 
+    function parseWorkbookRows(workbook) {
+      function key(value) { return normalize(String(value || "")).replace(/[^a-z0-9]/g, ""); }
+      for (var s = 0; s < workbook.SheetNames.length; s++) {
+        var matrix = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[s]], { header: 1, defval: "", raw: false });
+        for (var h = 0; h < Math.min(matrix.length, 10); h++) {
+          var header = matrix[h].map(key);
+          var tskCol = header.indexOf("numerodeordem");
+          var endCol = header.indexOf("endid");
+          var neCol = header.indexOf("neid");
+          if (tskCol < 0 || endCol < 0 || neCol < 0) continue;
+          var imported = [];
+          for (var r = h + 1; r < matrix.length; r++) {
+            var line = matrix[r] || [];
+            var tsk = String(line[tskCol] || "").trim();
+            var endId = String(line[endCol] || "").trim();
+            var neId = String(line[neCol] || "").trim();
+            if (!tsk && !endId && !neId) continue;
+            imported.push({ id: cryptoId(), imported: true, sourceRow: r + 1,
+              tsk: tsk, endId: endId, neId: neId, response: "", status: null,
+              method: "", note: "Aguardando teste", attempts: [], ticket: "" });
+          }
+          return imported;
+        }
+      }
+      throw new Error("Não encontrei as colunas Número de Ordem, END_ID e NE ID.");
+    }
+    function isPortalError(text, mode, id) {
+      var normalized = normalize(text);
+      if (!/ocorreu um erro|erro ao consultar|falha ao consultar|internal server error|request failed|timeout|tempo esgotado/.test(normalized)) return false;
+      var endpoint = /\/enderecos\/([^\/\s|?#]+)\/links/i.exec(text);
+      return mode !== "END_ID" || !endpoint || normalize(endpoint[1]) === normalize(id);
+    }
+    function isSheetResult(text, mode, id) {
+      var normalized = normalize(text);
+      if (mode === "TSK") {
+        return /o evento\s+eve\d+\s+(?:nao atende|atende)\s+aos criterios de fechamento/.test(normalized) &&
+          normalized.indexOf("validado via") !== -1 && normalized.indexOf("netcool") !== -1;
+      }
+      if (normalized.indexOf(normalize(id)) === -1) return false;
+      return normalized.indexOf("alarmes netcool") !== -1 ||
+        /sem alarmes?|nenhum alarme|nao foram encontrados alarmes/.test(normalized);
+    }
+    function classifySheetResult(text, mode) {
+      if (mode === "TSK") {
+        var normalized = normalize(text);
+        if (/\bnao atende\s+aos criterios de fechamento/.test(normalized)) return "alarme";
+        if (/\batende\s+aos criterios de fechamento/.test(normalized)) return "normal";
+        return null;
+      }
+      return classify(text);
+    }
+    function snapshotResponses() {
+      return Array.from(document.querySelectorAll(SELECTOR_RESPONSE)).map(function (node) {
+        return { node: node, text: flatten(node) };
+      });
+    }
+    function selectAllSegmentsIfAsked() {
+      var portalText = normalize(Array.from(document.body.children).filter(function (child) {
+        return child !== panel;
+      }).map(function (child) { return child.innerText || child.textContent || ""; }).join(" "));
+      if (portalText.indexOf("gostaria de consultar para o segmento") === -1) return;
+      var buttons = document.querySelectorAll("button, [role='button']");
+      for (var i = buttons.length - 1; i >= 0; i--) {
+        var button = buttons[i];
+        if (panel.contains(button) || clickedSegmentButtons.has(button) || button.disabled ||
+            button.getAttribute("aria-disabled") === "true" || !button.getClientRects().length) continue;
+        if (normalize(button.innerText || button.textContent) !== "todos") continue;
+        clickedSegmentButtons.add(button);
+        button.click();
+        elStatus.textContent = "Segmento Todos selecionado; aguardando resposta.";
+        return;
+      }
+    }
+    function waitForSheetAnswer(mode, id, before) {
+      return new Promise(function (resolve) {
+        var started = Date.now();
+        var timer = setInterval(function () {
+          if (stopRequested) { clearInterval(timer); resolve({ kind: "stopped" }); return; }
+          selectAllSegmentsIfAsked();
+          var nodes = document.querySelectorAll(SELECTOR_RESPONSE);
+          for (var i = nodes.length - 1; i >= 0; i--) {
+            var text = flatten(nodes[i]);
+            if (!text) continue;
+            var prior = before.find(function (entry) { return entry.node === nodes[i]; });
+            if (prior && prior.text === text) continue;
+            if (isPortalError(text, mode, id)) { clearInterval(timer); resolve({ kind: "error", text: text }); return; }
+            if (isIntermediateMessage(text)) continue;
+            if (isSheetResult(text, mode, id)) {
+              clearInterval(timer); resolve({ kind: "result", text: text }); return;
+            }
+          }
+          if (Date.now() - started >= RESPONSE_TIMEOUT_MS) {
+            clearInterval(timer); resolve({ kind: "timeout", text: "Sem resposta em 90 segundos" });
+          }
+        }, POLL_INTERVAL_MS);
+      });
+    }
+    function findTicketYesButton() {
+      var candidates = Array.from(document.querySelectorAll("button, [role='button']")).filter(function (button) {
+        return !panel.contains(button) && normalize(button.innerText || button.textContent || button.value) === "sim" &&
+          button.getClientRects().length > 0 && !clickedTicketButtons.has(button);
+      });
+      var portalChoices = candidates.filter(function (button) {
+        return button.matches("button.button-text.btn.button-size");
+      });
+      var pageText = normalize(Array.from(document.body.children).filter(function (child) {
+        return child !== panel;
+      }).map(function (child) { return child.innerText || child.textContent || ""; }).join(" "));
+      var ordered = portalChoices.concat(candidates.filter(function (button) { return portalChoices.indexOf(button) === -1; }));
+      for (var i = 0; i < ordered.length; i++) {
+        var parent = ordered[i];
+        for (var depth = 0; depth < 5 && parent && parent !== document.body; depth++, parent = parent.parentElement) {
+          var text = normalize(parent.innerText || parent.textContent);
+          if (/registrar.{0,90}ticket|ticket.{0,90}registrar/.test(text)) return ordered[i];
+        }
+      }
+      if (portalChoices.length === 1 && /registrar.{0,90}ticket|ticket.{0,90}registrar/.test(pageText)) return portalChoices[0];
+      return candidates.length === 1 && /registrar.{0,90}ticket|ticket.{0,90}registrar/.test(pageText) ? candidates[0] : null;
+    }
+    function confirmTicketRegistration() {
+      return new Promise(function (resolve) {
+        var started = Date.now();
+        var timer = setInterval(function () {
+          if (stopRequested) { clearInterval(timer); resolve(false); return; }
+          var button = findTicketYesButton();
+          if (button) {
+            clickedTicketButtons.add(button);
+            button.click(); clearInterval(timer); resolve(true); return;
+          }
+          if (Date.now() - started >= 12000) { clearInterval(timer); resolve(false); }
+        }, POLL_INTERVAL_MS);
+      });
+    }
+
     function ensureXlsx() {
       return new Promise(function (resolve) {
         if (window.XLSX) { resolve(); return; }
@@ -307,10 +445,12 @@
     var panel = document.createElement("div");
     panel.id = "tat-panel";
     panel.innerHTML =
-      '<div id="tat-header">Testador de Alarmes <button id="tat-toggle">–</button></div>' +
+      '<div id="tat-header"><span>Testador de Alarmes</span><span id="tat-connectivity-host"></span><button id="tat-toggle">–</button></div>' +
       '<div id="tat-body">' +
       '  <textarea id="tat-list" placeholder="Cole aqui a lista de END_ID, um por linha"></textarea>' +
       '  <div class="tat-row"><button id="tat-start">Iniciar</button><button id="tat-stop" disabled>Parar</button></div>' +
+      '  <label id="tat-import-label">Importar planilha (.xlsx)<input id="tat-import" type="file" accept=".xlsx,.xls"></label>' +
+      '  <div class="tat-row"><button id="tat-sheet-start" disabled>Testar planilha</button><span id="tat-sheet-info"></span></div>' +
       '  <div id="tat-status">Pronto.</div>' +
       '  <div id="tat-stats">' +
       '    <div class="tat-stat" id="stat-alarme"><b>0</b><span>Alarme</span></div>' +
@@ -328,7 +468,8 @@
       '    <input type="text" id="kw-input" placeholder="palavra..."><button id="kw-add">+</button></div>' +
       "  </div>" +
       "</div>";
-    document.body.appendChild(panel);
+    panel.querySelector("#tat-body").insertAdjacentHTML("beforeend", "<footer aria-label=\"Informações do desenvolvedor\" style=\"margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center\"><div>Desenvolvedor: <strong style=\"font-weight:600\">Cleverson Renan</strong></div><div style=\"display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px\"><a href=\"mailto:cleversonrenan@gmail.com\" style=\"color:inherit;text-decoration:none\">cleversonrenan@gmail.com</a><a href=\"https://wa.me/5521983600686\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"WhatsApp: (21) 98360-0686\" style=\"display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\" style=\"flex-shrink:0\"><path d=\"M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z\"/></svg>(21) 98360-0686</a></div></footer>");
+  document.body.appendChild(panel);
 
     var style = document.createElement("style");
     style.textContent =
@@ -337,11 +478,13 @@
       "font-size:12px;color:#e6edf5;box-shadow:0 8px 24px rgba(0,0,0,.5);}" +
       "#tat-header{padding:8px 10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;" +
       "background:#0a0f1c;border-bottom:1px solid #2a344a;border-radius:8px 8px 0 0;position:sticky;top:0;z-index:2;}" +
-      "#tat-header button{background:none;border:none;color:#e6edf5;cursor:pointer;font-size:14px;}" +
+      "#tat-header button{background:none;border:none;color:#e6edf5;cursor:pointer;font-size:14px;flex:none;}" +
+      "#tat-connectivity-host{margin-left:auto;display:inline-flex;align-items:center;}" +
       "#tat-body{padding:10px;display:flex;flex-direction:column;gap:8px;}" +
       "#tat-panel textarea,#tat-panel input,#tat-panel select{width:100%;background:#121b2e;color:#e6edf5;" +
       "border:1px solid #2a344a;border-radius:6px;padding:6px;font-family:inherit;font-size:11px;box-sizing:border-box;}" +
       "#tat-list{height:70px;font-family:monospace;}" +
+      "#tat-import-label{display:block;color:#8fa1b8;}#tat-import{margin-top:4px;}#tat-sheet-info{align-self:center;color:#8fa1b8;font-size:10px;}" +
       ".tat-row{display:flex;gap:6px;}" +
       "#tat-panel button{flex:1;background:#1c2740;border:1px solid #2a344a;color:#e6edf5;border-radius:6px;" +
       "padding:6px;cursor:pointer;}" +
@@ -382,6 +525,86 @@
     var elToggle = panel.querySelector("#tat-toggle");
     var elKwToggle = panel.querySelector("#tat-kw-toggle");
     var elKwBody = panel.querySelector("#tat-kw-body");
+    var elImport = panel.querySelector("#tat-import");
+    var elSheetStart = panel.querySelector("#tat-sheet-start");
+    var elSheetInfo = panel.querySelector("#tat-sheet-info");
+
+    // Indicador independente da fila de testes: consulta apenas a página do portal.
+    var connectivityHost = panel.querySelector("#tat-connectivity-host");
+    var connectivityRoot = connectivityHost.attachShadow({ mode: "open" });
+    var connectivityStyle = document.createElement("style");
+    connectivityStyle.textContent = "/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */\n@layer properties{@supports (((-webkit-hyphens:none)) and (not (margin-trim:inline))) or ((-moz-orient:inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--tw-border-style:solid;--tw-font-weight:initial}}}@layer theme{:root,:host{--tat-color-slate-200:oklch(92.9% .013 255.508);--tat-color-slate-700:oklch(37.2% .044 257.287);--tat-color-slate-900:oklch(20.8% .042 265.755);--tat-spacing:.25rem;--tat-font-weight-medium:500;--tat-animate-pulse:pulse 2s cubic-bezier(.4, 0, .6, 1) infinite}}@layer utilities{.tat\\:inline-flex{display:inline-flex}.tat\\:size-2{width:calc(var(--tat-spacing) * 2);height:calc(var(--tat-spacing) * 2)}.tat\\:shrink-0{flex-shrink:0}.tat\\:animate-pulse{animation:var(--tat-animate-pulse)}.tat\\:items-center{align-items:center}.tat\\:gap-2{gap:calc(var(--tat-spacing) * 2)}.tat\\:rounded-full{border-radius:3.40282e38px}.tat\\:border{border-style:var(--tw-border-style);border-width:1px}.tat\\:border-slate-700{border-color:var(--tat-color-slate-700)}.tat\\:bg-\\[\\#22c55e\\]{background-color:#22c55e}.tat\\:bg-\\[\\#eab308\\]{background-color:#eab308}.tat\\:bg-\\[\\#ef4444\\]{background-color:#ef4444}.tat\\:bg-slate-900{background-color:var(--tat-color-slate-900)}.tat\\:px-2{padding-inline:calc(var(--tat-spacing) * 2)}.tat\\:py-1{padding-block:var(--tat-spacing)}.tat\\:text-\\[11px\\]{font-size:11px}.tat\\:font-medium{--tw-font-weight:var(--tat-font-weight-medium);font-weight:var(--tat-font-weight-medium)}.tat\\:text-slate-200{color:var(--tat-color-slate-200)}}@property --tw-border-style{syntax:\"*\";inherits:false;initial-value:solid}@property --tw-font-weight{syntax:\"*\";inherits:false}@keyframes pulse{50%{opacity:.5}}";
+    connectivityRoot.appendChild(connectivityStyle);
+    var connectivityBadge = document.createElement("span");
+    connectivityBadge.className = "tat:inline-flex tat:items-center tat:gap-2 tat:rounded-full tat:border tat:border-slate-700 tat:bg-slate-900 tat:px-2 tat:py-1 tat:text-[11px] tat:font-medium tat:text-slate-200";
+    connectivityBadge.innerHTML = '<span id="tat-connection-dot" class="tat:size-2 tat:shrink-0 tat:rounded-full tat:bg-[#eab308] tat:animate-pulse" aria-hidden="true"></span><span id="tat-connection-text" role="status" aria-live="polite">Reconectando...</span>';
+    connectivityRoot.appendChild(connectivityBadge);
+    var connectivityDot = connectivityRoot.querySelector("#tat-connection-dot");
+    var connectivityText = connectivityRoot.querySelector("#tat-connection-text");
+    var CONNECTIVITY_INTERVAL_MS = 15000;
+    var CONNECTIVITY_FRESH_MS = 45000;
+    var CONNECTIVITY_TIMEOUT_MS = 6000;
+    var CONNECTIVITY_FAILURE_LIMIT = 3;
+    var lastConnectivitySuccess = 0;
+    var connectivityFailures = 0;
+    var connectivityInFlight = false;
+    var connectivityTimer = null;
+    var connectivityState = "reconnecting";
+
+    function setConnectivityState(state, detail) {
+      connectivityState = state;
+      var classes = {
+        connected: "tat:size-2 tat:shrink-0 tat:rounded-full tat:bg-[#22c55e]",
+        reconnecting: "tat:size-2 tat:shrink-0 tat:rounded-full tat:bg-[#eab308] tat:animate-pulse",
+        disconnected: "tat:size-2 tat:shrink-0 tat:rounded-full tat:bg-[#ef4444]"
+      };
+      var labels = { connected: "Conectado", reconnecting: "Reconectando...", disconnected: "Perda de conexão" };
+      connectivityDot.className = classes[state];
+      connectivityText.textContent = labels[state];
+      connectivityBadge.title = detail || labels[state];
+    }
+    async function probePortal() {
+      if (connectivityInFlight) return;
+      connectivityInFlight = true;
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, CONNECTIVITY_TIMEOUT_MS);
+      try {
+        if (!navigator.onLine) throw new Error("Navegador offline");
+        var response = await fetch(location.href, {
+          method: "GET", credentials: "include", cache: "no-store", signal: controller.signal
+        });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        if (new URL(response.url).origin !== location.origin) throw new Error("Redirecionado para outro site");
+        connectivityFailures = 0;
+        lastConnectivitySuccess = Date.now();
+        setConnectivityState("connected", "Portal respondeu agora (HTTP " + response.status + ")");
+      } catch (error) {
+        connectivityFailures++;
+        var detail = error.name === "AbortError" ? "Tempo de resposta esgotado" : (error.message || String(error));
+        setConnectivityState(connectivityFailures >= CONNECTIVITY_FAILURE_LIMIT ? "disconnected" : "reconnecting",
+          detail + " · tentativa " + connectivityFailures + "/" + CONNECTIVITY_FAILURE_LIMIT);
+      } finally {
+        clearTimeout(timeout);
+        connectivityInFlight = false;
+        connectivityTimer = setTimeout(probePortal, CONNECTIVITY_INTERVAL_MS);
+      }
+    }
+    function refreshConnectivity() {
+      if (lastConnectivitySuccess && Date.now() - lastConnectivitySuccess > CONNECTIVITY_FRESH_MS && connectivityState === "connected") {
+        setConnectivityState("reconnecting", "Última resposta do portal há mais de 45 segundos");
+      }
+      if (!connectivityInFlight) {
+        clearTimeout(connectivityTimer);
+        probePortal();
+      }
+    }
+    window.addEventListener("online", refreshConnectivity);
+    window.addEventListener("offline", refreshConnectivity);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) refreshConnectivity();
+    });
+    window.addEventListener("pageshow", refreshConnectivity);
+    probePortal();
 
     elToggle.addEventListener("click", function () {
       var collapsed = elBody.style.display === "none";
@@ -429,11 +652,26 @@
         item.className = "tat-row-item";
         var top = document.createElement("div");
         top.className = "tat-row-top";
-        top.innerHTML = '<span class="tat-endid">' + row.endId + "</span>" + badgeHtml(row);
+        var name = document.createElement("span");
+        name.className = "tat-endid";
+        name.textContent = row.endId || row.neId || row.tsk || "Sem identificador";
+        top.appendChild(name);
+        var badgeHolder = document.createElement("span");
+        badgeHolder.innerHTML = badgeHtml(row);
+        top.appendChild(badgeHolder.firstChild);
         item.appendChild(top);
+        if (row.imported) {
+          var meta = document.createElement("div");
+          meta.className = "tat-resp";
+          meta.textContent = "TSK: " + (row.tsk || "—") + " · NE: " + (row.neId || "—") +
+            " · Via: " + (row.method || "—") + " · Linha: " + row.sourceRow +
+            (row.ticket ? " · Ticket: " + row.ticket : "");
+          item.appendChild(meta);
+        }
         var resp = document.createElement("div");
         resp.className = "tat-resp";
-        var displayText = displayResponse(row.response, row.status) || "(sem resposta ainda)";
+        var displayText = row.imported && row.method === "TSK" ? row.response : displayResponse(row.response, row.status);
+        displayText = displayText || row.note || "(sem resposta ainda)";
         var rawText = row.response || displayText;
         resp.textContent = displayText;
         resp.title = "clique para ver texto original";
@@ -476,13 +714,13 @@
       var row = rows.find(function (r) { return r.id === rowId; });
       if (!row) return;
       row.status = label;
-      var added = learn(label, row.response, row.endId);
+      var added = row.imported ? [] : learn(label, row.response, row.endId);
       saveSession(); renderTable();
       if (added.length) elStatus.textContent = "Aprendido: " + added.join(", ");
     }
 
     function upsertRow(endId, responseText) {
-      var row = rows.find(function (r) { return r.endId.toUpperCase() === endId.toUpperCase(); });
+      var row = rows.find(function (r) { return !r.imported && r.endId.toUpperCase() === endId.toUpperCase(); });
       if (!row) { row = { id: cryptoId(), endId: endId, response: "", status: null }; rows.push(row); }
       row.response = responseText;
       var suggested = classify(responseText);
@@ -518,7 +756,7 @@
       var attempts = rounds || RETRY_ROUNDS;
       for (var r = 0; r < attempts; r++) {
         if (stopRequested) break;
-        var pendentes = rows.filter(function (row) { return !row.status; });
+        var pendentes = rows.filter(function (row) { return !row.imported && !row.status; });
         if (pendentes.length === 0) break;
         elStatus.textContent = "Retentativa " + (r + 1) + "/" + attempts + ": " + pendentes.length + " pendente(s)...";
         for (var i = 0; i < pendentes.length; i++) {
@@ -536,7 +774,9 @@
       var sendBtn = document.querySelector(SELECTOR_SEND);
       if (!input || !sendBtn) {
         elStatus.textContent = "Não encontrei o campo/botão do chat nesta página.";
-        running = false; elStart.disabled = false; elStop.disabled = true;
+        running = false; elStart.disabled = false;
+        elSheetStart.disabled = !rows.some(function (row) { return row.imported; });
+        elStop.disabled = true;
         return;
       }
       for (var i = 0; i < list.length; i++) {
@@ -547,7 +787,7 @@
       }
 
       if (!stopRequested) {
-        var pendBefore = rows.filter(function (row) { return !row.status; }).length;
+        var pendBefore = rows.filter(function (row) { return !row.imported && !row.status; }).length;
         if (pendBefore > 0) {
           elStatus.textContent = pendBefore + " pendente(s). Re-testando " + RETRY_ROUNDS + "x...";
           await retryPending(RETRY_ROUNDS);
@@ -555,27 +795,143 @@
       }
 
       running = false; stopRequested = false;
-      elStart.disabled = false; elStop.disabled = true;
-      var pend = rows.filter(function (row) { return !row.status; }).length;
-      elStatus.textContent = "Concluído: " + rows.length + " na tabela, " + pend + " pendente(s) após retentativas.";
+      elStart.disabled = false;
+      elSheetStart.disabled = !rows.some(function (row) { return row.imported; });
+      elStop.disabled = true;
+      var manual = rows.filter(function (row) { return !row.imported; });
+      var pend = manual.filter(function (row) { return !row.status; }).length;
+      elStatus.textContent = "Concluído: " + manual.length + " na tabela, " + pend + " pendente(s) após retentativas.";
     }
+
+    async function runSheetQuery(mode, id) {
+      var input = document.querySelector(SELECTOR_INPUT);
+      var sendBtn = document.querySelector(SELECTOR_SEND);
+      if (!input || !sendBtn) return { kind: "missing", text: "Campo ou botão do chat não encontrado" };
+      var before = snapshotResponses();
+      var command = id + (mode === "TSK" ? " validar" : " alarme");
+      try {
+        setNativeValue(input, command);
+        sendBtn.click();
+        return await waitForSheetAnswer(mode, id, before);
+      } catch (e) {
+        return { kind: "error", text: "Falha ao enviar consulta: " + (e.message || e) };
+      }
+    }
+    async function runSpreadsheet() {
+      var targets = rows.filter(function (row) { return row.imported && !row.status; });
+      var interrupted = false;
+      try {
+        for (var i = 0; i < targets.length; i++) {
+          if (stopRequested) { interrupted = true; break; }
+          var row = targets[i];
+          var steps = [
+            { mode: "END_ID", id: row.endId },
+            { mode: "NE ID", id: row.neId },
+            { mode: "TSK", id: row.tsk }
+          ].filter(function (step) { return !!step.id; });
+          row.response = ""; row.method = ""; row.note = "Em andamento";
+          row.attempts = [];
+          for (var j = 0; j < steps.length; j++) {
+            if (stopRequested) { interrupted = true; break; }
+            var step = steps[j];
+            elStatus.textContent = "Planilha " + (i + 1) + "/" + targets.length + " · " + step.mode + ": " + step.id;
+            row.note = "Consultando " + step.mode + " " + step.id;
+            saveSession(); renderTable();
+            var result = await runSheetQuery(step.mode, step.id);
+            if (result.kind === "stopped") { interrupted = true; break; }
+            if (result.kind === "missing") {
+              row.note = result.text; interrupted = true; stopRequested = true; break;
+            }
+            var status = result.kind === "result" ? classifySheetResult(result.text, step.mode) : null;
+            row.attempts.push(step.mode + ": " + (status || result.kind));
+            if (status) {
+              row.status = status;
+              row.response = result.text;
+              row.method = step.mode;
+              row.note = "Resolvido por " + step.mode;
+              if (step.mode === "TSK") {
+                elStatus.textContent = "TSK respondida; aguardando a opção Sim para registrar no ticket...";
+                var registered = await confirmTicketRegistration();
+                row.ticket = registered ? "Sim selecionado" : "Opção Sim não encontrada";
+                if (!registered) row.note += " · confirmação do ticket não encontrada";
+              }
+              break;
+            }
+            row.response = "";
+            row.note = (result.kind === "error" ? "Erro" : result.kind === "timeout" ? "Timeout" : "Resposta inconclusiva") +
+              " em " + step.mode + (j + 1 < steps.length ? "; próximo: " + steps[j + 1].mode : "; sem alternativa");
+            saveSession(); renderTable();
+            if (j + 1 < steps.length && !stopRequested) await sleep(DELAY_BETWEEN_MS);
+          }
+          if (interrupted) {
+            if (!row.status) row.note = "Interrompido; pronto para retomar";
+            saveSession(); renderTable(); break;
+          }
+          saveSession(); renderTable();
+          if (i + 1 < targets.length && !stopRequested) await sleep(DELAY_BETWEEN_MS);
+        }
+      } finally {
+        running = false; stopRequested = false;
+        elStart.disabled = false; elSheetStart.disabled = !rows.some(function (row) { return row.imported; });
+        elStop.disabled = true;
+        var imported = rows.filter(function (row) { return row.imported; });
+        var pending = imported.filter(function (row) { return !row.status; }).length;
+        elStatus.textContent = interrupted ? "Interrompido. " + pending + " linha(s) pendente(s)." :
+          "Planilha concluída: " + (imported.length - pending) + " resolvida(s), " + pending + " pendente(s).";
+      }
+    }
+
+    elImport.addEventListener("change", async function () {
+      var file = elImport.files && elImport.files[0];
+      if (!file) return;
+      if (running) { elStatus.textContent = "Pare a pesquisa antes de importar outra planilha."; elImport.value = ""; return; }
+      elStatus.textContent = "Lendo planilha...";
+      try {
+        await ensureXlsx();
+        if (!window.XLSX) throw new Error("Não foi possível carregar o leitor de planilhas.");
+        var data = await file.arrayBuffer();
+        var workbook = XLSX.read(data, { type: "array" });
+        var imported = parseWorkbookRows(workbook);
+        if (!imported.length) throw new Error("Nenhuma linha com TSK, END_ID ou NE ID foi encontrada.");
+        rows = rows.filter(function (row) { return !row.imported; }).concat(imported);
+        saveSession(); renderTable();
+        elSheetStart.disabled = false;
+        elSheetInfo.textContent = imported.length + " linhas";
+        elStatus.textContent = file.name + ": " + imported.length + " linha(s) importada(s).";
+      } catch (e) { elStatus.textContent = "Falha na importação: " + (e.message || e); }
+      elImport.value = "";
+    });
+    elSheetStart.addEventListener("click", function () {
+      if (running) return;
+      if (!rows.some(function (row) { return row.imported && !row.status; })) {
+        elStatus.textContent = "Não há linhas pendentes na planilha."; return;
+      }
+      running = true; stopRequested = false;
+      elStart.disabled = true; elSheetStart.disabled = true; elStop.disabled = false;
+      runSpreadsheet().catch(function (e) { elStatus.textContent = "Erro na planilha: " + (e.message || e); });
+    });
 
     elStart.addEventListener("click", function () {
       if (running) return;
       var list = parseList(elList.value);
       if (list.length === 0) { elStatus.textContent = "Cole uma lista de END_ID primeiro."; return; }
       running = true; stopRequested = false;
-      elStart.disabled = true; elStop.disabled = false;
+      elStart.disabled = true; elSheetStart.disabled = true; elStop.disabled = false;
       runTests(list);
     });
     elStop.addEventListener("click", function () { stopRequested = true; elStatus.textContent = "Parando..."; });
 
     renderTable();
+    var restoredSheetRows = rows.filter(function (row) { return row.imported; });
+    elSheetStart.disabled = restoredSheetRows.length === 0;
+    if (restoredSheetRows.length) elSheetInfo.textContent = restoredSheetRows.length + " linhas salvas";
 
     panel.querySelector("#tat-clear").addEventListener("click", function () {
+      if (running) { elStatus.textContent = "Pare a pesquisa antes de limpar a tabela."; return; }
       if (rows.length === 0) return;
       if (confirm("Limpar a tabela atual? As palavras aprendidas não serão apagadas.")) {
         rows = []; saveSession(); renderTable();
+        elSheetStart.disabled = true; elSheetInfo.textContent = "";
       }
     });
 
@@ -583,13 +939,21 @@
       if (rows.length === 0) { elStatus.textContent = "Nada para exportar."; return; }
       elStatus.textContent = "Carregando gerador de planilha...";
       await ensureXlsx();
+      if (!window.XLSX) { elStatus.textContent = "Não foi possível carregar o gerador de planilhas."; return; }
       var wb = XLSX.utils.book_new();
       function sheetFor(filterFn) {
         var data = rows.filter(filterFn).map(function (r) {
           return {
+            "Linha da planilha": r.sourceRow || "",
+            "Número de Ordem": r.tsk || "",
             "END_ID": r.endId,
+            "NE ID": r.neId || "",
             "Status": r.status === "alarme" ? "ALARME" : (r.status === "normal" ? "NORMALIZADO" : "PENDENTE"),
-            "Resposta do portal": displayResponse(r.response, r.status)
+            "Via": r.method || (r.imported ? "" : "END_ID"),
+            "Registro no ticket": r.ticket || "",
+            "Tentativas": Array.isArray(r.attempts) ? r.attempts.join("; ") : (r.attempts || ""),
+            "Observação": r.note || "",
+            "Resposta do portal": r.imported && r.method === "TSK" ? r.response : displayResponse(r.response, r.status)
           };
         });
         return XLSX.utils.json_to_sheet(data);
