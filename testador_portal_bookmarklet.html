@@ -69,7 +69,7 @@
 
   <header>
     <h1>Instalar Testador de Alarmes no Portal</h1>
-    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.5</span></p>
+    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.8</span></p>
   </header>
 
   <div class="card">
@@ -77,7 +77,7 @@
     <ol>
       <li><b>Arraste o botão azul abaixo</b> para a barra de favoritos do seu navegador (Ctrl+Shift+B para mostrar a barra).</li>
       <li>Abra o portal <code>tim-access-portal-prd.133e5xtaze4h...</code> e <b>clique no favorito</b> que acabou de criar.</li>
-      <li>Um painel "Testador de Alarmes" aparece no canto do portal. Importe a planilha e clique em <b>Testar planilha</b>, ou cole END_ID e clique em <b>Iniciar</b>.</li>
+      <li>Um painel "Testador de Alarmes" aparece no canto do portal. Adicione até três planilhas e clique em <b>Testar acumuladas</b>, ou cole END_ID e clique em <b>Iniciar</b>.</li>
     </ol>
 
     <div class="bookmark-slot">
@@ -98,11 +98,12 @@
       <li><b>Aguarda a resposta real</b> (a que contém "ALARMES NETCOOL PARA O END_ID ...") e ignora as mensagens de aguardo ("Vou verificar...") e de feedback.</li>
       <li>Só então classifica a linha como <span style="color:var(--red);font-weight:700;">ALARME</span> ou <span style="color:var(--green);font-weight:700;">NORMAL</span> na tabela.</li>
       <li>Exporta a planilha <code>.xlsx</code> com uma aba para Todos, Com Alarme, Normalizados e Pendentes.</li>
+      <li>Adicione até três arquivos de uma vez ou aos poucos; as linhas serão acumuladas. O relatório preserva <b>Tipo da Falha</b> da origem.</li>
       <li>Na planilha importada, tenta <code>END_ID alarme</code>, depois <code>NE ID alarme</code> e, se necessário, <code>TSK validar</code>. Após a resposta da TSK, seleciona <b>Sim</b> para registrar no ticket.</li>
     </ol>
   </div>
 
-<footer aria-label="Informações do desenvolvedor" style="margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center"><div>Desenvolvedor: <strong style="font-weight:600">Cleverson Renan</strong></div><div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px"><a href="mailto:cleversonrenan@gmail.com" style="color:inherit;text-decoration:none">cleversonrenan@gmail.com</a>   • <a href="https://wa.me/5521983600686" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp: (21) 98360-0686" style="display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style="flex-shrink:0"><path d="M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z"/></svg>(21) 98360-0686</a></div></footer>
+<footer aria-label="Informações do desenvolvedor" style="margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center"><div>Desenvolvedor: <strong style="font-weight:600">Cleverson Renan</strong></div><div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px"><a href="mailto:cleversonrenan@gmail.com" style="color:inherit;text-decoration:none">cleversonrenan@gmail.com</a><a href="https://wa.me/5521983600686" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp: (21) 98360-0686" style="display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" style="flex-shrink:0"><path d="M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z"/></svg>(21) 98360-0686</a></div></footer>
 </div>
 
 <script type="text/plain" id="appCode">
@@ -114,7 +115,7 @@
     var SELECTOR_INPUT = "#btn-input";
     var SELECTOR_SEND = "#btn-chat";
     var SELECTOR_RESPONSE = ".all-copy.format-text";
-    var DELAY_BETWEEN_MS = 2500;
+    var DELAY_BETWEEN_MS = 700;
     var RESPONSE_TIMEOUT_MS = 90000;
     var POLL_INTERVAL_MS = 400;
     var RETRY_ROUNDS = 2;
@@ -142,6 +143,8 @@
     var keywords = loadKeywords();
     var rows = loadSession();
     var running = false;
+    var importing = false;
+    var MAX_SPREADSHEETS = 3;
     var stopRequested = false;
     var clickedTicketButtons = new WeakSet();
     var clickedSegmentButtons = new WeakSet();
@@ -306,6 +309,8 @@
           var tskCol = header.indexOf("numerodeordem");
           var endCol = header.indexOf("endid");
           var neCol = header.indexOf("neid");
+          var failureCol = header.indexOf("tipodafalha");
+          if (failureCol < 0) failureCol = header.indexOf("tipodefalha");
           if (tskCol < 0 || endCol < 0 || neCol < 0) continue;
           var imported = [];
           for (var r = h + 1; r < matrix.length; r++) {
@@ -315,7 +320,7 @@
             var neId = String(line[neCol] || "").trim();
             if (!tsk && !endId && !neId) continue;
             imported.push({ id: cryptoId(), imported: true, sourceRow: r + 1,
-              tsk: tsk, endId: endId, neId: neId, response: "", status: null,
+              tsk: tsk, endId: endId, neId: neId, failureType: failureCol < 0 ? "" : String(line[failureCol] == null ? "" : line[failureCol]).trim(), response: "", status: null,
               method: "", note: "Aguardando teste", attempts: [], ticket: "" });
           }
           return imported;
@@ -449,8 +454,8 @@
       '<div id="tat-body">' +
       '  <textarea id="tat-list" placeholder="Cole aqui a lista de END_ID, um por linha"></textarea>' +
       '  <div class="tat-row"><button id="tat-start">Iniciar</button><button id="tat-stop" disabled>Parar</button></div>' +
-      '  <label id="tat-import-label">Importar planilha (.xlsx)<input id="tat-import" type="file" accept=".xlsx,.xls"></label>' +
-      '  <div class="tat-row"><button id="tat-sheet-start" disabled>Testar planilha</button><span id="tat-sheet-info"></span></div>' +
+      '  <label id="tat-import-label">Adicionar planilhas (até 3)<input id="tat-import" type="file" accept=".xlsx,.xls" multiple></label>' +
+      '  <div class="tat-row"><button id="tat-sheet-start" disabled>Testar acumuladas</button><span id="tat-sheet-info"></span></div>' +
       '  <div id="tat-status">Pronto.</div>' +
       '  <div id="tat-stats">' +
       '    <div class="tat-stat" id="stat-alarme"><b>0</b><span>Alarme</span></div>' +
@@ -468,35 +473,35 @@
       '    <input type="text" id="kw-input" placeholder="palavra..."><button id="kw-add">+</button></div>' +
       "  </div>" +
       "</div>";
-    panel.querySelector("#tat-body").insertAdjacentHTML("beforeend", "<footer aria-label=\"Informações do desenvolvedor\" style=\"margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center\"><div>Desenvolvedor: <strong style=\"font-weight:600\">Cleverson Renan</strong></div><div style=\"display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px\"><a href=\"mailto:cleversonrenan@gmail.com\" style=\"color:inherit;text-decoration:none\">cleversonrenan@gmail.com</a>   • <a href=\"https://wa.me/5521983600686\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"WhatsApp: (21) 98360-0686\" style=\"display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\" style=\"flex-shrink:0\"><path d=\"M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z\"/></svg>(21) 98360-0686</a></div></footer>");
+    panel.querySelector("#tat-body").insertAdjacentHTML("beforeend", "<footer aria-label=\"Informações do desenvolvedor\" style=\"margin-top:16px;padding:12px 8px;border-top:1px solid #22304a;color:#8fa1b8;font:11px/1.7 system-ui,sans-serif;text-align:center\"><div>Desenvolvedor: <strong style=\"font-weight:600\">Cleverson Renan</strong></div><div style=\"display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 14px\"><a href=\"mailto:cleversonrenan@gmail.com\" style=\"color:inherit;text-decoration:none\">cleversonrenan@gmail.com</a><a href=\"https://wa.me/5521983600686\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"WhatsApp: (21) 98360-0686\" style=\"display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none;white-space:nowrap\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\" style=\"flex-shrink:0\"><path d=\"M20.52 3.48A11.9 11.9 0 0 0 12.05 0C5.47 0 .12 5.35.12 11.93c0 2.1.55 4.16 1.6 5.98L.02 24l6.25-1.64a11.9 11.9 0 0 0 5.77 1.47h.01c6.58 0 11.93-5.35 11.94-11.93a11.86 11.86 0 0 0-3.47-8.42ZM12.05 21.8a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.72.98.99-3.63-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.47 4.45-9.92 9.93-9.92a9.85 9.85 0 0 1 7.02 2.91 9.86 9.86 0 0 1 2.9 7.02c0 5.48-4.45 9.93-9.98 9.86Zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.95 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.14-.13.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.18-1.42-.08-.12-.28-.2-.58-.35Z\"/></svg>(21) 98360-0686</a></div></footer>");
   document.body.appendChild(panel);
 
     var style = document.createElement("style");
     style.textContent =
-      "#tat-panel{position:fixed;top:12px;right:12px;width:380px;max-height:92vh;overflow:auto;z-index:999999;" +
+      "#tat-panel{position:fixed;top:8px;right:8px;width:300px;max-width:calc(100vw - 16px);max-height:65vh;overflow:auto;z-index:999999;" +
       "background:#0e1424;border:1px solid #2a344a;border-radius:8px;font-family:system-ui,sans-serif;" +
       "font-size:12px;color:#e6edf5;box-shadow:0 8px 24px rgba(0,0,0,.5);}" +
-      "#tat-header{padding:8px 10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;" +
+      "#tat-header{padding:5px 7px;gap:4px;flex-wrap:wrap;font-weight:700;display:flex;justify-content:space-between;align-items:center;" +
       "background:#0a0f1c;border-bottom:1px solid #2a344a;border-radius:8px 8px 0 0;position:sticky;top:0;z-index:2;}" +
       "#tat-header button{background:none;border:none;color:#e6edf5;cursor:pointer;font-size:14px;flex:none;}" +
       "#tat-connectivity-host{margin-left:auto;display:inline-flex;align-items:center;}" +
-      "#tat-body{padding:10px;display:flex;flex-direction:column;gap:8px;}" +
+      "#tat-body{padding:6px;display:flex;flex-direction:column;gap:5px;}" +
       "#tat-panel textarea,#tat-panel input,#tat-panel select{width:100%;background:#121b2e;color:#e6edf5;" +
       "border:1px solid #2a344a;border-radius:6px;padding:6px;font-family:inherit;font-size:11px;box-sizing:border-box;}" +
-      "#tat-list{height:70px;font-family:monospace;}" +
+      "#tat-list{height:42px;min-height:36px;resize:vertical;font-family:monospace;}" +
       "#tat-import-label{display:block;color:#8fa1b8;}#tat-import{margin-top:4px;}#tat-sheet-info{align-self:center;color:#8fa1b8;font-size:10px;}" +
       ".tat-row{display:flex;gap:6px;}" +
       "#tat-panel button{flex:1;background:#1c2740;border:1px solid #2a344a;color:#e6edf5;border-radius:6px;" +
-      "padding:6px;cursor:pointer;}" +
+      "padding:3px 5px;min-height:24px;font-size:11px;line-height:1.3;cursor:pointer;}" +
       "#tat-panel button:disabled{opacity:.4;cursor:not-allowed;}" +
       "#tat-panel button:hover:not(:disabled){border-color:#3E8EF7;}" +
       "#tat-status{color:#8fa1b8;}" +
       "#tat-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;}" +
-      ".tat-stat{background:#121b2e;border:1px solid #2a344a;border-radius:6px;padding:4px;text-align:center;}" +
-      ".tat-stat b{display:block;font-size:14px;} .tat-stat span{color:#8fa1b8;font-size:9px;}" +
+      ".tat-stat{background:#121b2e;border:1px solid #2a344a;border-radius:4px;padding:2px;text-align:center;}" +
+      ".tat-stat b{display:inline;font-size:12px;margin-right:3px;} .tat-stat span{color:#8fa1b8;font-size:9px;}" +
       "#stat-alarme b{color:#E4483C;} #stat-normal b{color:#33C481;} #stat-pendente b{color:#F2B90C;}" +
-      "#tat-table{max-height:260px;overflow:auto;border:1px solid #2a344a;border-radius:6px;}" +
-      ".tat-row-item{border-bottom:1px solid #22304A;padding:6px 8px;}" +
+      "#tat-table{max-height:120px;overflow:auto;border:1px solid #2a344a;border-radius:6px;}" +
+      ".tat-row-item{border-bottom:1px solid #22304A;padding:4px 5px;}" +
       ".tat-row-item:last-child{border-bottom:none;}" +
       ".tat-row-top{display:flex;justify-content:space-between;align-items:center;gap:6px;}" +
       ".tat-endid{font-family:monospace;font-weight:700;}" +
@@ -514,6 +519,7 @@
       ".tat-kw{display:flex;align-items:center;gap:4px;background:#121b2e;border:1px solid #2a344a;" +
       "border-radius:999px;padding:2px 6px;font-size:10px;}" +
       ".tat-kw button{background:none;border:none;color:inherit;padding:0;font-size:11px;flex:none;}";
+    style.textContent += "#tat-panel{box-sizing:border-box;}#tat-panel #tat-header{position:sticky;top:0;z-index:2;}#tat-panel #tat-header button{flex:none;min-width:24px;}#tat-panel #tat-status{font-size:11px;line-height:1.35;overflow-wrap:anywhere;}#tat-panel footer{margin-top:4px!important;padding:5px 2px!important;font-size:10px!important;line-height:1.4!important;}#tat-panel input[type=file]{font-size:10px;padding:3px;}#tat-panel .tat-row{gap:4px;}";
     document.head.appendChild(style);
 
     var elList = panel.querySelector("#tat-list");
@@ -666,6 +672,7 @@
           meta.textContent = "TSK: " + (row.tsk || "—") + " · NE: " + (row.neId || "—") +
             " · Via: " + (row.method || "—") + " · Linha: " + row.sourceRow +
             (row.ticket ? " · Ticket: " + row.ticket : "");
+          meta.title = [row.tsk, row.failureType].filter(Boolean).join(" | ");
           item.appendChild(meta);
         }
         var resp = document.createElement("div");
@@ -699,6 +706,7 @@
         elTable.appendChild(item);
       });
       renderStats();
+      updateImportSummary();
     }
     function renderStats() {
       var alarme = rows.filter(function (r) { return r.status === "alarme"; }).length;
@@ -881,28 +889,59 @@
       }
     }
 
+    function importedSources() {
+      var sources = new Map();
+      rows.filter(function (row) { return row.imported; }).forEach(function (row) {
+        sources.set(row.sourceBatch || "legacy", row.sourceFile || "Planilha salva anteriormente");
+      });
+      return sources;
+    }
+    function updateImportSummary() {
+      var sources = importedSources();
+      var count = rows.filter(function (row) { return row.imported; }).length;
+      elSheetInfo.textContent = sources.size + "/" + MAX_SPREADSHEETS + " planilhas · " + count + " linhas";
+      elSheetInfo.title = count + " linhas acumuladas para teste";
+      elSheetStart.disabled = running || importing || !rows.some(function (row) { return row.imported && !row.status; });
+    }
+
     elImport.addEventListener("change", async function () {
-      var file = elImport.files && elImport.files[0];
-      if (!file) return;
-      if (running) { elStatus.textContent = "Pare a pesquisa antes de importar outra planilha."; elImport.value = ""; return; }
-      elStatus.textContent = "Lendo planilha...";
+      var files = Array.from(elImport.files || []);
+      if (!files.length) return;
+      if (running || importing) { elStatus.textContent = "Aguarde a operação atual antes de importar."; elImport.value = ""; return; }
+      if (importedSources().size + files.length > MAX_SPREADSHEETS) {
+        elStatus.textContent = "Limite de 3 planilhas. Limpe a tabela para iniciar um novo conjunto.";
+        elImport.value = ""; return;
+      }
+      importing = true; elImport.disabled = true; elStart.disabled = true;
+      updateImportSummary();
+      elStatus.textContent = "Lendo " + files.length + " planilha(s)...";
       try {
         await ensureXlsx();
         if (!window.XLSX) throw new Error("Não foi possível carregar o leitor de planilhas.");
-        var data = await file.arrayBuffer();
-        var workbook = XLSX.read(data, { type: "array" });
-        var imported = parseWorkbookRows(workbook);
-        if (!imported.length) throw new Error("Nenhuma linha com TSK, END_ID ou NE ID foi encontrada.");
-        rows = rows.filter(function (row) { return !row.imported; }).concat(imported);
+        var additions = [];
+        for (var f = 0; f < files.length; f++) {
+          var file = files[f];
+          try {
+            var data = await file.arrayBuffer();
+            var workbook = XLSX.read(data, { type: "array" });
+            var imported = parseWorkbookRows(workbook);
+            if (!imported.length) throw new Error("Nenhuma linha com TSK, END_ID ou NE ID foi encontrada.");
+            var batch = cryptoId();
+            imported.forEach(function (row) { row.sourceBatch = batch; row.sourceFile = file.name; });
+            additions = additions.concat(imported);
+          } catch (e) { throw new Error(file.name + ": " + (e.message || e)); }
+        }
+        rows = rows.concat(additions);
         saveSession(); renderTable();
-        elSheetStart.disabled = false;
-        elSheetInfo.textContent = imported.length + " linhas";
-        elStatus.textContent = file.name + ": " + imported.length + " linha(s) importada(s).";
+        elStatus.textContent = files.length + " planilha(s) adicionada(s), " + additions.length + " nova(s) linha(s). Clique em Testar acumuladas.";
       } catch (e) { elStatus.textContent = "Falha na importação: " + (e.message || e); }
-      elImport.value = "";
+      finally {
+        importing = false; elImport.disabled = false; elStart.disabled = false;
+        elImport.value = ""; updateImportSummary();
+      }
     });
     elSheetStart.addEventListener("click", function () {
-      if (running) return;
+      if (running || importing) return;
       if (!rows.some(function (row) { return row.imported && !row.status; })) {
         elStatus.textContent = "Não há linhas pendentes na planilha."; return;
       }
@@ -912,7 +951,7 @@
     });
 
     elStart.addEventListener("click", function () {
-      if (running) return;
+      if (running || importing) return;
       var list = parseList(elList.value);
       if (list.length === 0) { elStatus.textContent = "Cole uma lista de END_ID primeiro."; return; }
       running = true; stopRequested = false;
@@ -922,16 +961,12 @@
     elStop.addEventListener("click", function () { stopRequested = true; elStatus.textContent = "Parando..."; });
 
     renderTable();
-    var restoredSheetRows = rows.filter(function (row) { return row.imported; });
-    elSheetStart.disabled = restoredSheetRows.length === 0;
-    if (restoredSheetRows.length) elSheetInfo.textContent = restoredSheetRows.length + " linhas salvas";
-
     panel.querySelector("#tat-clear").addEventListener("click", function () {
-      if (running) { elStatus.textContent = "Pare a pesquisa antes de limpar a tabela."; return; }
+      if (running || importing) { elStatus.textContent = "Aguarde a importação ou pare a pesquisa antes de limpar a tabela."; return; }
       if (rows.length === 0) return;
       if (confirm("Limpar a tabela atual? As palavras aprendidas não serão apagadas.")) {
         rows = []; saveSession(); renderTable();
-        elSheetStart.disabled = true; elSheetInfo.textContent = "";
+        updateImportSummary();
       }
     });
 
@@ -948,6 +983,7 @@
             "Número de Ordem": r.tsk || "",
             "END_ID": r.endId,
             "NE ID": r.neId || "",
+            "Tipo da Falha": r.failureType || "",
             "Status": r.status === "alarme" ? "ALARME" : (r.status === "normal" ? "NORMALIZADO" : "PENDENTE"),
             "Via": r.method || (r.imported ? "" : "END_ID"),
             "Registro no ticket": r.ticket || "",
@@ -956,7 +992,7 @@
             "Resposta do portal": r.imported && r.method === "TSK" ? r.response : displayResponse(r.response, r.status)
           };
         });
-        return XLSX.utils.json_to_sheet(data);
+        return XLSX.utils.json_to_sheet(data, { header: ["Linha da planilha", "Número de Ordem", "END_ID", "NE ID", "Tipo da Falha", "Status", "Via", "Registro no ticket", "Tentativas", "Observação", "Resposta do portal"] });
       }
       XLSX.utils.book_append_sheet(wb, sheetFor(function () { return true; }), "Todos");
       XLSX.utils.book_append_sheet(wb, sheetFor(function (r) { return r.status === "alarme"; }), "Com Alarme");
