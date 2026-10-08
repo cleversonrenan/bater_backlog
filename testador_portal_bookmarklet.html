@@ -69,7 +69,7 @@
 
   <header>
     <h1>Instalar Testador de Alarmes no Portal</h1>
-    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.8</span></p>
+    <p>Instalação única. Depois é só abrir o portal e clicar no favorito — sem Tampermonkey, sem colar script toda vez.<span class="tag">versão 1.9</span></p>
   </header>
 
   <div class="card">
@@ -301,32 +301,56 @@
     }
 
     function parseWorkbookRows(workbook) {
-      function key(value) { return normalize(String(value || "")).replace(/[^a-z0-9]/g, ""); }
+      function key(value) { return normalize(String(value == null ? "" : value)).replace(/[^a-z0-9]/g, ""); }
+      var aliases = {
+        tsk: ["numerodeordem", "tsk", "numerodaordem", "ordemdeservico"],
+        endId: ["endid", "idend"],
+        neId: ["neid", "idne"],
+        failureType: ["tipodafalha", "tipodefalha"]
+      };
+      function columns(header, names) {
+        return names.map(function (name) { return header.indexOf(name); }).filter(function (index) { return index >= 0; });
+      }
+      function identifier(value) {
+        var text = String(value == null ? "" : value).trim();
+        if (/^(?:n\s*\/\s*[ia]|n[aã]o informado|n[aã]o se aplica|null|undefined|-+|—+)?$/i.test(text)) return "";
+        return text;
+      }
+      function readIdentifier(line, indexes) {
+        for (var i = 0; i < indexes.length; i++) {
+          var value = identifier(line[indexes[i]]);
+          if (value) return value;
+        }
+        return "";
+      }
       for (var s = 0; s < workbook.SheetNames.length; s++) {
         var matrix = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[s]], { header: 1, defval: "", raw: false });
-        for (var h = 0; h < Math.min(matrix.length, 10); h++) {
+        for (var h = 0; h < Math.min(matrix.length, 20); h++) {
           var header = matrix[h].map(key);
-          var tskCol = header.indexOf("numerodeordem");
-          var endCol = header.indexOf("endid");
-          var neCol = header.indexOf("neid");
-          var failureCol = header.indexOf("tipodafalha");
-          if (failureCol < 0) failureCol = header.indexOf("tipodefalha");
-          if (tskCol < 0 || endCol < 0 || neCol < 0) continue;
+          var tskCols = columns(header, aliases.tsk);
+          var endCols = columns(header, aliases.endId);
+          var neCols = columns(header, aliases.neId);
+          var failureCols = columns(header, aliases.failureType);
+          if (!tskCols.length && !endCols.length && !neCols.length) continue;
           var imported = [];
           for (var r = h + 1; r < matrix.length; r++) {
             var line = matrix[r] || [];
-            var tsk = String(line[tskCol] || "").trim();
-            var endId = String(line[endCol] || "").trim();
-            var neId = String(line[neCol] || "").trim();
+            var tsk = readIdentifier(line, tskCols);
+            var endId = readIdentifier(line, endCols);
+            var neId = readIdentifier(line, neCols);
             if (!tsk && !endId && !neId) continue;
+            if ((!tsk || aliases.tsk.indexOf(key(tsk)) >= 0) &&
+                (!endId || aliases.endId.indexOf(key(endId)) >= 0) &&
+                (!neId || aliases.neId.indexOf(key(neId)) >= 0)) continue;
             imported.push({ id: cryptoId(), imported: true, sourceRow: r + 1,
-              tsk: tsk, endId: endId, neId: neId, failureType: failureCol < 0 ? "" : String(line[failureCol] == null ? "" : line[failureCol]).trim(), response: "", status: null,
+              tsk: tsk, endId: endId, neId: neId,
+              failureType: readIdentifier(line, failureCols), response: "", status: null,
               method: "", note: "Aguardando teste", attempts: [], ticket: "" });
           }
-          return imported;
+          if (imported.length) return imported;
         }
       }
-      throw new Error("Não encontrei as colunas Número de Ordem, END_ID e NE ID.");
+      throw new Error("Não encontrei linhas para testar. Use uma coluna TSK ou Número de Ordem, END_ID ou NE ID.");
     }
     function isPortalError(text, mode, id) {
       var normalized = normalize(text);
@@ -454,7 +478,7 @@
       '<div id="tat-body">' +
       '  <textarea id="tat-list" placeholder="Cole aqui a lista de END_ID, um por linha"></textarea>' +
       '  <div class="tat-row"><button id="tat-start">Iniciar</button><button id="tat-stop" disabled>Parar</button></div>' +
-      '  <label id="tat-import-label">Adicionar planilhas (até 3)<input id="tat-import" type="file" accept=".xlsx,.xls" multiple></label>' +
+      '  <label id="tat-import-label">Adicionar atividades ou relatório (até 3)<input id="tat-import" type="file" accept=".xlsx,.xls" multiple></label>' +
       '  <div class="tat-row"><button id="tat-sheet-start" disabled>Testar acumuladas</button><span id="tat-sheet-info"></span></div>' +
       '  <div id="tat-status">Pronto.</div>' +
       '  <div id="tat-stats">' +
@@ -520,6 +544,7 @@
       "border-radius:999px;padding:2px 6px;font-size:10px;}" +
       ".tat-kw button{background:none;border:none;color:inherit;padding:0;font-size:11px;flex:none;}";
     style.textContent += "#tat-panel{box-sizing:border-box;}#tat-panel #tat-header{position:sticky;top:0;z-index:2;}#tat-panel #tat-header button{flex:none;min-width:24px;}#tat-panel #tat-status{font-size:11px;line-height:1.35;overflow-wrap:anywhere;}#tat-panel footer{margin-top:4px!important;padding:5px 2px!important;font-size:10px!important;line-height:1.4!important;}#tat-panel input[type=file]{font-size:10px;padding:3px;}#tat-panel .tat-row{gap:4px;}";
+    style.textContent += "#tat-panel .tat-row-item{border-left:3px solid transparent;}#tat-panel .tat-row-item.normal,#tat-panel #stat-normal{background:#123d2b;border-color:#329968;color:#dcfce7;}#tat-panel .tat-row-item.alarme,#tat-panel #stat-alarme{background:#4a2025;border-color:#d55e68;color:#ffe4e6;}#tat-panel .tat-row-item.pendente,#tat-panel #stat-pendente{background:#443710;border-color:#cfa62d;color:#fff3bd;}#tat-panel .tat-row-item.normal .tat-resp{color:#bce8cf;}#tat-panel .tat-row-item.alarme .tat-resp{color:#f3bfc4;}#tat-panel .tat-row-item.pendente .tat-resp{color:#ecdaa0;}#tat-panel #tat-stats .tat-stat span{color:inherit;}#tat-panel #stat-normal b{color:#86efac;}#tat-panel #stat-alarme b{color:#fda4af;}#tat-panel #stat-pendente b{color:#fde047;}#tat-panel .tat-row-item .tat-mini-actions button{background:rgba(0,0,0,.18);border-color:currentColor;color:inherit;}";
     document.head.appendChild(style);
 
     var elList = panel.querySelector("#tat-list");
@@ -655,7 +680,7 @@
       elTable.innerHTML = "";
       rows.forEach(function (row) {
         var item = document.createElement("div");
-        item.className = "tat-row-item";
+        item.className = "tat-row-item " + (row.status === "normal" ? "normal" : row.status === "alarme" ? "alarme" : "pendente");
         var top = document.createElement("div");
         top.className = "tat-row-top";
         var name = document.createElement("span");
